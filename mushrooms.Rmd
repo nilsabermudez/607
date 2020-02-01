@@ -1,0 +1,44 @@
+---
+title: "mushrooms.Rmd"
+author: "Catlin"
+date: "2/1/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## read data
+
+read mushroom data
+
+```{r}
+mushrooms <- read.csv("https://archive.ics.uci.edu/ml/machine-learning-databases/mushroom/agaricus-lepiota.data",header = FALSE, sep = ",")
+```
+
+## prepare data
+
+Mushroom data test
+
+```{r}
+mushrooms <- subset(mushrooms, select = c(V1, V4, V6, V23))
+colnames(mushrooms) <- c("Class", "CapColor", "Odor", "Habitat")
+levels(mushrooms$Class) <- c("edible", "poisonous")
+levels(mushrooms$CapColor) <- c("buff", "cinnamon", "red", "gray", "brown", "pink", 
+"green", "purple", "white", "yellow")
+levels(mushrooms$Odor) <- c("almond", "creosote", "foul", "anise", "musty", "none", 
+"pungent", "spicy", "fishy")
+levels(mushrooms$Habitat) <- c("woods", "grasses", "leaves", "meadows", "paths", "urban", 
+"waste")
+```
+
+## Show data for mushrooms
+
+
+```{r}
+head(mushrooms)
+```
+
+## Conclusions
+
