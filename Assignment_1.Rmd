@@ -1,0 +1,55 @@
+---
+title: "607: Assigment_1"
+author: "Nilsa Bermudez"
+date: "2/2/2020"
+output: html_document
+---
+
+
+
+
+## Introduction
+The dataset that I chose was from the article "Higher Rates Of Hate Crimes Are Tied To Income Inequality". My subset of data is what what are the average stats by State for education, income and those who voted for Trump.
+
+Here is the article: https://fivethirtyeight.com/features/higher-rates-of-hate-crimes-are-tied-to-income-inequality/
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Read data
+
+```{r}
+HateCrimes <- read.csv("https://raw.githubusercontent.com/fivethirtyeight/data/master/hate-crimes/hate_crimes.csv",header = TRUE, sep = ",")
+```
+
+## Get a subset of the data
+
+
+```{r}
+HateCrimes <- subset(HateCrimes, select = c(1,2,5,10,12))
+colnames(HateCrimes) <- c("State","Income","HSDegree","VotedTrump","AvgHateCrimes")
+
+
+```
+## Show the data 
+```{r}
+head(HateCrimes)
+```
+
+## Conclusion
+
+I would like to see more data including news items over time.  In order to see if there is a pattern in the data directly affected by news stories.
+
+
+```{r HateCrimes}
+summary(HateCrimes)
+```
+
+
+
+
+
+
+
