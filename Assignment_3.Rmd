@@ -1,0 +1,143 @@
+--- 
+title: "607:  Assignment 3"
+author: "Nilsa Bermudez"
+date: "2/15/2020"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    theme: cosmo
+    highlight: zenburn
+---
+
+library(stringr)
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Introduction
+
+Please deliver links to an R Markdown file (in GitHub and rpubs.com) with solutions to the problems below.  You may work in a small group, but please submit separately with names of all group participants in your submission.
+
+#1. Using the 173 majors listed in fivethirtyeight.com’s College Majors dataset [https://fivethirtyeight.com/features/the-economic-guide-to-picking-a-college-major/], provide code that identifies the majors that contain either "DATA" or "STATISTICS"
+
+
+#2 Write code that transforms the data below:
+
+[1] "bell pepper"  "bilberry"     "blackberry"   "blood orange"
+[5] "blueberry"    "cantaloupe"   "chili pepper" "cloudberry"  
+[9] "elderberry"   "lime"         "lychee"       "mulberry"    
+[13] "olive"        "salal berry"
+
+Into a format like this:
+
+c("bell pepper", "bilberry", "blackberry", "blood orange", "blueberry", "cantaloupe", "chili pepper", "cloudberry", "elderberry", "lime", "lychee", "mulberry", "olive", "salal berry")
+
+The two exercises below are taken from R for Data Science, 14.3.5.1 in the on-line version:
+
+#3 Describe, in words, what these expressions will match:
+
+(.)\1\1
+"(.)(.)\\2\\1"
+(..)\1
+"(.).\\1.\\1"
+"(.)(.)(.).*\\3\\2\\1"
+
+#4 Construct regular expressions to match words that:
+
+  Start and end with the same character.
+  Contain a repeated pair of letters (e.g. "church" contains "ch" repeated twice.)
+  Contain one letter repeated in at least three places (e.g. "eleven" contains three "e"s.)
+
+
+## 1 
+```{r FindMajors,eval=TRUE}
+
+majorsWithStatOrData <- read.csv("https://raw.githubusercontent.com/fivethirtyeight/data/master/college-majors/majors-list.csv",header = TRUE, sep = ",")
+
+grep(pattern = 'STATISTICS|DATA', majorsWithStatOrData$Major, value = TRUE, ignore.case = TRUE)
+
+```
+
+## 2
+
+```{r Strings}
+HoldStrings <-'[1] "bell pepper"  "bilberry"     "blackberry"   "blood orange"
+[5] "blueberry"    "cantaloupe"   "chili pepper" "cloudberry"  
+[9] "elderberry"   "lime"         "lychee"       "mulberry"    
+[13] "olive"        "salal berry"'
+
+NewString <- stringr::str_extract_all(HoldStrings, pattern ='[A-Za-z]+.?[A-Za-z]+')
+
+suppressWarnings(GreatJob <- stringr::str_c(NewString, collapse = ", "))
+# Not good practice to suppress warnings but in this case I made an exception, I was still getting the right resultset.
+
+writeLines(GreatJob)
+```
+
+
+
+
+## 3  
+Describe, in words, what these expressions will match:
+        1. (.)\1\1 
+        2. “(.)(.)\2\1” 
+        3. (..)\1 
+        4. “(.).\1.\1” 
+        5."(.)(.)(.).*\3\2\1" 
+        
+
+    1. (.)\1\1
+    This will match characters that are three times in a row.
+    
+    2. "(.)(.)\\2\\1"
+    This will match any four characters that read the same forward and backward.
+    
+    3. (..)\1
+    This will match two characters repeated. 
+    
+    4. "(.).\\1.\\1"
+    This will match five characters where the first, third and fifth are the same and the second and fourth can 
+    be anything.
+    
+    5. "(.)(.)(.).*\\3\\2\\1"
+    This will match six or more characters where the first three characters are the same as the last three 
+    in reverse order.
+    
+## 4
+
+
+Start and end with the same character:
+
+
+```{r SameChar}    
+SameCharacter <- c("doted", "boob", "life", "dog", "kid", "dozed", "dread", "kiosk")
+
+GetResults <- stringr::str_view(SameCharacter, "^(.).*\\1$", match = TRUE)
+
+GetResults
+
+```
+    
+Contain a repeated pair of letters (e.g. "church" contains "ch" repeated twice.)
+
+```{r RepeatedPair}
+RepeatedPair <- c("eleven", "between", "church")
+
+results <- stringr::str_view(RepeatedPair, "(..)\\1", match = TRUE)
+
+results
+```
+
+   Contain one letter repeated in at least three places (e.g. "eleven" contains three "e"s.)
+  
+
+```{r LetterTimesThree}
+words <- c("telephone", "remember", "eleven", "church", "Mississippi")
+
+stringr::str_view(words, "(.).*\\1.*\\1", match = TRUE)
+
+```
+
