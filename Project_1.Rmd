@@ -1,0 +1,163 @@
+---
+title: "Project_1"
+author: "Nilsa Bermudez"
+date: "2/22/2020"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    theme: cosmo
+    highlight: zenburn
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+library(stringr)
+
+
+
+
+## Introduction
+
+
+## Project 1
+
+
+In this project, you’re given a text file with chess tournament results where the information has some structure. Your
+job is to create an R Markdown file that generates a .CSV file (that could for example be imported into a SQL database)
+with the following information for all of the players:
+Player’s Name, Player’s State, Total Number of Points, Player’s Pre-Rating, and Average Pre Chess Rating of Opponents
+
+For the first player, the information would be:
+
+Gary Hua, ON, 6.0, 1794, 1605
+
+### Approach: I tend to either oversimplify or overthink solutions.  I took the approach of splitting the tasks step by step by parsing out the data in parts.  I'm sure there is a shorter, more eloquent solution.
+
+
+
+
+```{r ReadFile}
+chessResults <- readLines("https://raw.githubusercontent.com/nilsabermudez/607/master/tournamentinfo.txt", warn="FALSE")
+
+```
+
+
+```{r NofRows}
+numberOfRows <- length(chessResults)
+
+```
+
+Starting at the 5th row get the data for every 3rd sequence
+```{r HowManyRows}
+rows <- chessResults[seq(5, numberOfRows, 3)]
+
+head(rows, 5)
+```
+
+
+Get the player names
+
+```{r PlayerNames}
+playerNames <- as.character(stringr::str_trim (stringr::str_extract(rows,"(\\w+\\s){2,3}")))
+
+head(playerNames, 10)
+
+```
+Get the player numbers
+
+```{r PlayerNums}
+
+playerNo <- as.integer(stringr::str_extract(rows, "\\d+"))
+
+head(playerNo, 10)
+
+```
+
+
+
+```{r WhatStates}
+
+SecondRowstates <- chessResults[seq(6, numberOfRows, 3)]
+
+head(SecondRowstates, 10)
+
+``` 
+Get the states
+```{r WhatStateAbb}
+ states <- as.character(stringr::str_extract(SecondRowstates, "\\w+"))
+
+ head(states, 5)
+```
+Get the points for the players
+
+```{r PlayerPoints}
+playersPoints <- as.numeric(stringr::str_extract(rows,"\\d+\\.\\d+"))
+
+head(playersPoints, 10)
+```
+Get the opponents
+```{r}
+playerOpponents <- stringr::str_extract_all(stringr::str_extract_all(rows,"\\d+\\|"), "\\d+")
+
+```
+
+Get the Prerating
+
+```{r}
+
+Prerating <- as.integer(stringr::str_extract(stringr::str_extract(SecondRowstates, "[^\\d]\\d{3,4}[^\\d]"), "\\d+"))
+
+head(Prerating, 5)
+
+```
+
+Get the average rating
+
+```{r AverageRating}
+AvgRating <- length(playerNo)
+for (i in 1:(length(playerNo))) {
+AvgRating[i] <- round(mean(Prerating[as.numeric(unlist
+                                       (playerOpponents
+                                         [playerNo[i]]))]))
+head(AvgRating)
+
+}
+```
+
+Put it all in a dataframe
+
+```{r InsertIntoDataFrame}
+df <- data.frame(playerNames,states,
+playersPoints,Prerating,AvgRating)
+head(df, 5)
+
+
+```
+
+Rename the columns 
+
+```{r RenameColumns}
+colnames(df) <- c("Player's Name","Player's State", 
+"Total Number of Points", "Player's Pre-Rating",
+"Average Pre Chess Rating of Opponents")
+```
+
+```{r}
+head(df)
+
+```
+I put a histogram here - I was looking at where the majority of the players' average rating was.
+
+```{r}
+hist(AvgRating, main="Histogram for Average Rating",border="blue", col="green")
+```
+
+
+Write the file
+
+```{r WRITEFile}
+write.csv(df, "Project1.csv", row.names=FALSE)
+
+```
