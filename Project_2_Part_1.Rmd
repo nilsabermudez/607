@@ -1,0 +1,71 @@
+
+---
+title: "Project_2 - Part 1"
+author: "Nilsa Bermudez"
+date: "3/8/2020"
+output: html_document
+---
+
+library(sqldf)
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+## Introduction
+
+(1) Choose any three of the “wide” datasets identified in the Week 6 Discussion items. (You may
+use your own dataset; please don’t use my Sample Post dataset, since that was used in your
+Week 6 assignment!) For each of the three chosen datasets:
+ Create a .CSV file (or optionally, a MySQL database!) that includes all of the information
+included in the dataset. You’re encouraged to use a “wide” structure similar to how the
+information appears in the discussion item, so that you can practice tidying and
+transformations as described below.
+ Read the information from your .CSV file into R, and use tidyr and dplyr as needed to
+tidy and transform your data. [Most of your grade will be based on this step!]
+ Perform the analysis requested in the discussion item.
+ Your code should be in an R Markdown file, posted to rpubs.com, and should include
+narrative descriptions of your data cleanup work, analysis, and conclusions.
+(2) Please include in your homework submission, for each of the three chosen datasets:
+ The URL to the .Rmd file in your GitHub repository, and
+ The URL for your rpubs.com web pag
+
+
+
+## Read the file - Clean up column names
+```{r readFile}
+
+cameras =read.table("https://raw.githubusercontent.com/nilsabermudez/607/master/camera_dataset.csv", header=TRUE, sep=",")
+
+
+cameradata <- (cameras)
+
+names(cameradata) <- c("Model", "ReleaseDate", "MaxResolution","MinResolution","EffectivePixels","ZoomWide","ZoomTele", "NormalRocusRange",	"MacroFocusRange","StorageWeight","WeightIncBatteries","Dimensions","Price")
+
+head (cameradata)
+
+cameradata <- sqldf::sqldf("select ReleaseDate, Model, Price from cameradata order by ReleaseDate")
+
+```
+
+
+## Average price by Year for a camera
+
+```{r}
+
+averagePrice <- sqldf::sqldf("select ReleaseDate, avg(Price) from cameradata group by ReleaseDate") 
+
+print(averagePrice)
+```
+
+
+
+
+```
+
+
+
+
+
+
+
