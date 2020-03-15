@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<books>
+    <book id="1">
+        <BookTitle>n the Time of the Butterflies</BookTitle>
+        <Author>Julia Alvarez</Author>
+	<Pages>353</Pages>
+        <Published>1994</Published>
+        <Genre>Novel</Genre>
+    </book>
+    <book id="2">
+        <BookTitle>In the Name of Salome</BookTitle>
+        <Author>Julia Alvarez</Author>
+    	<Pages>320</Pages>
+        <Published>2000</Published>
+        <Genre>Biographical Fiction</Genre>
+    </book>
+    <book id="3">
+        <BookTitle>Between the Lines</BookTitle>
+        <Author>Jodi Picoult and Samantha van Leer</Author>
+	<Pages>384</Pages>
+        <Published>2012</Published>
+        <Genre>Novel</Genre>
+    </book>
+    <book id="4">
+        <BookTitle>The House of the Spirits</BookTitle>
+        <Author>Isabel Allende</Author>
+        <Pages>496</Pages>
+        <Published>1982</Published>
+        <Genre>Novel</Genre>
+    </book>
+</books>
