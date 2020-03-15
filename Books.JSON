@@ -1,0 +1,30 @@
+{"books" :[
+    {
+    "BookTitle" : "In the Time of the Butterflies",
+    "Author" : "Julia Alvarez",
+    "Pages" : 353,
+    "Published" : 1994,
+    "Genre" : "Novel"
+    },
+    {
+    "BookTitle" : "In the Name of Salome",
+    "Author" : "Julia Alvarez",
+    "Pages" : 320,
+    "Published" : 2000,
+    "Genre" : "Biographical Fiction"
+    },
+    {
+    "BookTitle" : "Between the Lines",
+    "Author" : "Jodi Picoult and Samantha van Leer",
+    "Pages" : 384,
+    "Published" : 2012,
+    "Genre" : "Novel"
+    },
+    {
+    "BookTitle" : "The house of the Spirits",
+     "Author" : "Isabel Allende",
+    "Pages" : 496,
+    "Published" : 1982,
+    "Genre" : "Novel"
+    }]
+}
