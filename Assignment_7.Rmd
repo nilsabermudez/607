@@ -1,0 +1,105 @@
+---
+title: "Assignment_7"
+author: "Nilsa Bermudez"
+date: "3/14/2020"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    theme: cosmo
+    highlight: zenburn
+---
+library(XML);
+library(RCurl);
+library(jsonlite);
+library(DT);
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+
+Assignment:
+
+Pick three of your favorite books on one of your favorite subjects. At least one of the books should have more than one author. For each book, include the title, authors, and two or three other attributes that you find interesting.
+
+Take the information that you’ve selected about these three books, and separately create three files which store the book’s information in HTML (using an html table), XML, and JSON formats (e.g. “books.html”, “books.xml”, and “books.json”). To help you better understand the different file structures, I’d prefer that you create each of these files “by hand” unless you’re already very comfortable with the file formats.
+
+Write R code, using your packages of choice, to load the information from each of the three sources into separate R data frames. Are the three data frames identical?
+
+Your deliverable is the three source files and the R code. If you can, package your assignment solution up into an .Rmd file and publish to rpubs.com. [This will also require finding a way to make your three text files accessible from the web].
+
+
+# Introduction
+
+I created a table that the other tables should match when completed. I love to read novels and the four books I have selected are some of those that I have read for pleasure.
+
+
+
+# Load the book data
+ 
+```{r}
+books<-read.csv("https://raw.githubusercontent.com/nilsabermudez/607/master/FavoriteBooks.csv", stringsAsFactors = FALSE)
+
+```
+
+#2 Show the data
+
+```{r}
+ DT::datatable(books,options = list(pageLength = 2))
+     
+```
+
+## Created the HTML, the JSON, the XML files by hand
+"https://raw.githubusercontent.com/nilsabermudez/607/master/Books.HTML"
+"https://raw.githubusercontent.com/nilsabermudez/607/master/Books.XML"
+"https://raw.githubusercontent.com/nilsabermudez/607/master/Books.JSON"
+
+```{r HTML}
+
+bookshtmlURL <- "https://raw.githubusercontent.com/nilsabermudez/607/master/Books.HTML"
+bookshtmlContent <- RCurl::getURLContent(bookshtmlURL)
+booksHTML <-  XML::readHTMLTable(bookshtmlContent)
+booksHTML <- booksHTML[[1]]
+DT::datatable(booksHTML,options = list(pageLength = 2))
+
+```
+
+
+```{r XML}
+booksxmlURL <- "https://raw.githubusercontent.com/nilsabermudez/607/master/Books.XML"
+booksxmlContent <- RCurl::getURLContent(booksxmlURL)
+booksXMLparsed <- XML::xmlParse(booksxmlContent)
+booksXML <- XML::xmlToDataFrame(booksXMLparsed)
+DT::datatable(booksXML,options = list(pageLength = 2))
+```
+
+
+```{r JSON}
+booksJSONURL <- "https://raw.githubusercontent.com/nilsabermudez/607/master/Books.JSON"
+booksJSON <- jsonlite::fromJSON(booksJSONURL)
+booksJSON <- booksJSON[[1]]
+DT::datatable(booksJSON,options = list(pageLength = 2))
+```
+
+## Now we compare the three dataframes
+
+
+
+## Conclusion: It looks like they are identical. However, when you look at the JSON example, JSON appears to store the data differently and retains the datatype of the records.
+
+```{r Compare}
+head (books)
+str (books)
+head (booksHTML)
+str (booksHTML)
+head (booksXML)
+str (booksXML)
+head (booksJSON)
+str (booksJSON)
+
+```
+
