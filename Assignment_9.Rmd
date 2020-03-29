@@ -40,8 +40,8 @@ library(jsonlite);
 ```{r URLwithAPIkey}
 url <- "https://api.nytimes.com/svc/mostpopular/v2/viewed/1.json"
 
-api_key <- "?api-key=5EYgu00gNdMPkxRf1TuR5AkhKUvr7DOd"
-url <- paste(url, api_key, sep="")
+apikey <- "?api-key=5EYgu00gNdMPkxRf1TuR5AkhKUvr7DOd"
+url <- paste(url, apikey, sep="")
 x <-fromJSON(url)
 names(x)
 
