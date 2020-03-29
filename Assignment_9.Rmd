@@ -1,0 +1,60 @@
+---
+title: "Assignment_9"
+author: "Nilsa Bermudez"
+date: "3/26/2020"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    theme: cosmo
+    highlight: zenburn
+---
+
+
+
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Introduction
+
+The assignment:
+The New York Times web site provides a rich set of APIs, as described here:  https://developer.nytimes.com/apis You’ll need to start by signing up for an API key. Your task is to choose one of the New York Times APIs, construct an interface in R to read in the JSON data, and transform it into an R DataFrame. 
+ 
+
+## 1. Registered for my api key
+
+
+
+## 2. Set up the URL
+
+We need to insert the API key in order to access the New York Times API. We simply add it onto the end of the URL by using the paste() command.
+
+```{r}
+library(DT);
+library(jsonlite);
+```
+
+```{r URLwithAPIkey}
+url <- "https://api.nytimes.com/svc/mostpopular/v2/viewed/1.json"
+
+api_key <- "?api-key=5EYgu00gNdMPkxRf1TuR5AkhKUvr7DOd"
+url <- paste(url, api_key, sep="")
+x <-fromJSON(url)
+names(x)
+
+```
+
+
+## 3. Viewing the data(no surprise that the last viewable articles are all about the pandemic), we see that the data came out in a dataframe table:
+
+
+```{r DataFrame}
+
+df <- jsonlite::fromJSON(url, flatten = TRUE)
+DT::datatable(x$results)
+head(df)
+
+```
