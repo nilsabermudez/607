@@ -1,0 +1,235 @@
+---
+title: "Assignment 10"
+author: "Nilsa Bermudez"
+date: "4/4/2020"
+output:
+  html_document:
+    code_folding: hide
+    toc: true
+    toc_float: true
+    theme: cosmo
+    highlight: zenburn
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo=TRUE, message=FALSE, warning=FALSE)
+
+```
+
+
+```{r}
+Sys.setenv(R_GSCMD="C:/Program Files/gs/gs9.05/bin/gswin32c.exe")
+#install.packages('extrafont')
+library(extrafont)
+library(wordcloud)
+suppressMessages(library(ggplot2));
+suppressMessages(library(textdata));
+suppressMessages(library(lexicon));
+suppressMessages(library(DT));
+suppressMessages(library(tidytext));
+suppressMessages(library(jsonlite));
+suppressMessages(library(readr));
+suppressMessages(library(dplyr));
+suppressMessages(library(stringr));
+```
+
+
+## Introduction 
+
+In Text Mining with R, Chapter 2 looks at Sentiment Analysis.  In this assignment, I'll start by getting the primary example code from chapter 2 - Jane Austen 2.2 Sentiment analysis with inner join and word cloud.  
+
+I've chosen Yelp reviews as my corpus. 
+
+```{r} 
+warning=FALSE
+```
+
+```{r, echo=FALSE}
+1 + 1
+```
+
+```{r}
+# Load library
+library(janeaustenr)
+library(dplyr)
+library(stringr)
+library(tidytext)
+library(tidyr)
+library(ggplot2)
+library(textdata)
+library(wordcloud)
+
+# get linenumber and chapter 
+tidy_books <- austen_books() %>%
+  group_by(book) %>%
+  mutate(linenumber = row_number(),
+         chapter = cumsum(str_detect(text, 
+                                     regex("^chapter [\\divxlc]", 
+                                                 ignore_case = TRUE)))) %>%
+  ungroup() %>%
+  unnest_tokens(word, text)
+
+
+nrc_joy <- get_sentiments("nrc") %>% 
+  filter(sentiment == "joy")
+
+tidy_books %>%
+  filter(book == "Emma") %>%
+  inner_join(nrc_joy) %>%
+  count(word, sort = TRUE)
+library(ggplot2)
+
+library(janeaustenr)
+library(dplyr)
+library(stringr)
+
+original_books <- austen_books() %>%
+  group_by(book) %>%
+  mutate(linenumber = row_number(),
+         chapter = cumsum(str_detect(text, regex("^chapter [\\divxlc]",
+                                                 ignore_case = TRUE)))) %>%
+  ungroup()
+
+original_books
+library(tidytext)
+tidy_books <- original_books %>%
+  unnest_tokens(word, text)
+
+tidy_books
+
+data(stop_words)
+
+tidy_books <- tidy_books %>%
+  anti_join(stop_words)
+
+
+tidy_books %>%
+  count(word, sort = TRUE) 
+
+```
+
+
+
+# Here we have Jane Austen's Graph of most used words:
+```{r JaneGraph}
+tidy_books %>%
+  count(word, sort = TRUE) %>%
+  filter(n > 600) %>%
+  mutate(word = reorder(word, n)) %>%
+  ggplot(aes(word, n)) +
+  geom_col() +
+  xlab(NULL) +
+  coord_flip()
+
+```
+
+# Here we have Jane Austen's wordcloud:
+
+```{r JaneWordCloud}
+
+tidy_books %>%
+  anti_join(stop_words) %>%
+  count(word) %>%
+  with(wordcloud(word, n, max.words = 100,scale=c(2,1.0),))
+
+```
+
+
+```{r ReadFile}
+
+rs <- read.csv("https://raw.githubusercontent.com/nilsabermudez/607/master/yelp.csv", header=TRUE, sep=",")
+
+```
+
+
+```{r}
+ #rs %>%  select(1,3,4,5)
+
+
+```
+
+
+```{r SplitTheDataRenameColumn}
+splitrs <- splitstackshape::cSplit(rs, "text", " ", "long")
+colnames(splitrs)[5] <- "word"
+
+```
+
+```{r GetSentiments}
+bing <- get_sentiments("bing");
+
+bing_positive <- get_sentiments("bing") %>% 
+  filter(sentiment == "positive")
+#bing_positive
+
+bing_negative <- get_sentiments("bing") %>% 
+  filter(sentiment == "negative")
+#bing_negative
+
+  ss_positive <- splitrs %>%
+     inner_join(bing_positive, by = "word")
+
+  ss_negative <- splitrs %>%
+     inner_join(bing_negative, by = "word")
+  # ss_negative
+  # ss_positive
+
+```
+
+
+
+```{r GetCountsJustCause}
+review_words_counted_positive <-  count(ss_positive, c('word'))
+review_words_counted_negative <-  count(ss_negative, c('word'))
+
+ review_words_counted_negative
+ review_words_counted_positive
+ 
+ 
+  review_words_counted <- splitrs %>%
+   count(review_id, business_id, stars, word) %>%
+   ungroup()
+  review_words_counted
+  
+  #GetalltheSentiments
+  bing_word_counts <- splitrs %>%
+  inner_join(get_sentiments("bing")) %>%
+  count(word, sentiment, sort = TRUE) %>%
+  ungroup()
+  
+   bing_word_counts
+```
+
+
+# Here we have Yelp's top 10 most used words in their reviews:
+
+```{r Top10InGraph}
+
+G <- bing_word_counts %>%
+   group_by(sentiment=="positive")
+top10 <- head(dplyr::arrange(G,desc(n)), n = 10)
+
+  ggplot2::ggplot(data=top10, ggplot2::aes(x=reorder(word, -n), y=n)) +
+  ggplot2::geom_bar(stat="identity",fill='steel blue') +
+  ggplot2::labs(x="Top Words",y="Frequency") +
+  ggplot2::ggtitle("Top 10 Positive Words in Yelp Reviews") +
+  ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 90, vjust = 0.5, hjust=1))    
+
+
+```
+
+
+
+# Here we have Yelp's word cloud of reviews:
+
+```{r GetWordCloud}
+top50 <- head(dplyr::arrange(G,desc(n)), n = 50)
+
+top50 %>%
+  anti_join(stop_words) %>%
+  count(word) %>%
+  with(wordcloud(word, n, max.words = 100,rot.per=0.25,scale=c(2,1.0)))
+
+
+```
+
