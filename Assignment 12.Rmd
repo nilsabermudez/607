@@ -1,0 +1,44 @@
+---
+title: "Assignment 12"
+author: "Nilsa Bermudez"
+date: "`r Sys.Date()`"
+output:
+  prettydoc::html_pretty:
+    theme: architect
+    highlight: github
+---
+
+## Instacart's Recommender System
+
+Long before issues with supply shortages and dangers of going grocery shopping in person came to play, I was a happy Instacart user.
+
+Instacart provides access to multiple stores for a user to shop from and have Instacart shoppers shop and deliver items to you.
+
+**The design of the recommender is to first find out the customers that have reordered before and the items that have been reordered before. Then calculate the cosine similarity between all those users and products. 
+
+
+## Scenario Design for Instacart
+Instacart makes money off of fees charged for the delivery of orders placed on its site.
+
+Instacart shoppers make an average of $10 to $17 per hour. 
+
+
+##### 1. Who are your target users? 
+Anyone looking for groceries or household items.
+
+##### 2. What are their key goals? 
+Key goals are to find grocery items from your shopping list and have it delivered or go pick it up locally(I have personally never used this option).
+
+##### 3. How can you help them accomplish these goals?  
+Having the recommender system comes into play to suggest a similar item or to suggest something that the user has previously bought or looked at.  
+
+As a super user I think the site should extend their functionality for items that are not in stock at the store link you are shopping in.  The user could shop in one store and if their item is not in stock, the recommended items could be labeled as "Your item is available at:"
+
+Personally it is frustrating when addding an item to my cart and it is not available.  The user needs to go to each separate store and look for the item.  It would be very useful to have the item recommended to me if it is in stock at another store.
+
+
+### Sources:
+1. https://www.feedough.com/instacart-business-model-how-instacart-works/
+2. https://towardsdatascience.com/shopper-behavior-analysis-de3ff6b696b8
+
+
