@@ -1,0 +1,217 @@
+
+---
+title: "Project 4 - Document Classification"
+author: "Nilsa Bermudez"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    code_folding: hide
+    toc: true
+    toc_float: true
+    theme: cosmo
+    highlight: zenburn
+---
+
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo=TRUE, message=FALSE, warning=FALSE)
+
+```
+
+```{r}
+library(R.utils)
+library(readr)
+library(stringr)
+library(tidytext)
+library(dplyr)
+library(tidyr)
+library(wordcloud2)
+library(wordcloud)
+```
+
+
+## Introduction - Document Classification
+
+It can be useful to be able to classify new "test" documents using already classified "training" documents.  A common example is using a corpus of labeled spam and ham (non-spam) e-mails to predict whether or not a new document is spam.  
+
+For this project, you can start with a spam/ham dataset, then predict the class of new documents (either withheld from the training dataset or from another source such as your own spam folder).   One example corpus:   https://spamassassin.apache.org/old/publiccorpus/
+
+## Chosen datasets:
+
+```{r Datasets}
+
+urlSpam <- "http://spamassassin.apache.org/old/publiccorpus/"
+fileSpam <- "20050311_spam_2.tar.bz2"
+fileSpam2 <- "20050311_spam_2.tar"
+
+urlHam <- "http://spamassassin.apache.org/old/publiccorpus/"
+fileHam <- "20030228_easy_ham_2.tar.bz2"
+fileHam2 <- "20030228_easy_ham_2.tar"
+
+```
+
+## Get the emails
+
+```{r}
+
+
+setwd("C:/Users/NilsaBermudez/Downloads/spamham/20050311_spam_2/spam_2")
+
+spam.path <- "C:/Users/NilsaBermudez/Downloads/spamham/20050311_spam_2/spam_2/"
+
+              
+get.msg <- function(path) {
+   con <- file(path,open="rt")
+   text <- readLines(con)
+   msg <- text[seq(which(text=="")[1]+1,length(text))]  
+   close(con)
+   return(paste(msg,collapse="\n"))
+}
+
+spamdocs <- dir(spam.path)
+spamdocs <- spamdocs[which(spamdocs!="cmds")]
+all.spam <- sapply(spamdocs, function(p)get.msg(paste(spam.path,p,sep="")))
+
+spam_list <- do.call(rbind,lapply(all.spam, readr::read_file))
+spam_df <- data.frame(emails=sample(spam_list, 500, replace=FALSE))
+
+
+
+spamtestdata <-data.frame(rep(NA, 400))
+spamother <-data.frame(rep(NA, 100))
+
+spamtestdata$emails <- spam_df$emails[-(401:500)]
+spamother$emails <- spam_df$emails[-(1:400)]
+```
+
+```{r}
+setwd("C:/Users/NilsaBermudez/Downloads/spamham/20030228_easy_ham_2/easy_ham_2/")
+
+hampath<- "C:/Users/NilsaBermudez/Downloads/spamham/20030228_easy_ham_2/easy_ham_2/"
+
+ham.docs <- dir(hampath)
+ham.docs <- ham.docs[which(ham.docs!="cmds")]
+all.ham <- sapply(ham.docs, function(p)get.msg(paste(hampath,p,sep="")))
+
+ham_list <- do.call(rbind,lapply(all.ham, read_file))
+
+ham_df <- data.frame(emails=sample(ham_list, 1551, replace=TRUE))
+
+hamtest <-data.frame(rep(NA, 1449))
+hamtest$emails <- ham_df$emails[-(1450:1551)]
+
+hamother <- data.frame(rep(NA, 102))
+hamother$emails <- ham_df$emails[-(1:1449)]
+
+hamtest$emails <- as.character((hamtest$emails))
+```
+
+
+```{r}
+spamtestdata$emails <- as.character(spamtestdata$emails)
+
+wordnumspam <- vapply(strsplit(spamtestdata$emails, "\\w+"), length, integer(1))
+summary(wordnumspam)
+```
+
+
+```{r}
+spamtidy_df <- spamtestdata %>% 
+  unnest_tokens(word, emails) %>%
+  anti_join(stop_words) %>%
+  filter(str_detect(word, "[[:alpha:]]{3,}"))
+spamwords <- spamtidy_df %>% 
+  count(word, sort=TRUE)
+spamwords
+```
+Percentage of Spam Words
+```{r}
+spamsent <- spamtidy_df %>%
+  inner_join(get_sentiments("bing")) %>%
+  count(sentiment) 
+spamsent
+spamsentperc <- (spamsent$n[2]-spamsent$n[1])/(spamsent$n[2]+spamsent$n[1])
+spamsentperc
+```
+Interestingly enough it looks like the spam emails have more positive than negative sentiments.
+
+
+```{r}
+hamtidy_df <- hamtest %>% 
+  unnest_tokens(word, emails) %>%
+  anti_join(stop_words) %>%
+  filter(str_detect(word, "[[:alpha:]]{3,}"))
+hamtidy_df %>%
+  count(word, sort=TRUE) 
+```
+
+
+
+Percentage of Ham Words
+
+```{r}
+hamsent <- hamtidy_df %>%
+  inner_join(get_sentiments("bing")) %>%
+  count(sentiment) 
+hamsent
+hamsentperc <- (hamsent$n[2]-hamsent$n[1])/(hamsent$n[2]+hamsent$n[1])
+hamsentperc
+```
+Ham dataframes show more negative sentiments than positive sentiments.
+
+
+```{r}
+decision <- list()
+for (i in 1:length(hamother$rep.NA..102.)){
+  unknown <- data.frame(rep(NA, 1))
+  unknown$emails <- hamother$emails[i]
+  unknown$emails <- as.character(unknown$emails)  
+  tidy_df <- unknown %>% 
+      unnest_tokens(word, emails) %>%
+      anti_join(stop_words) %>%
+      filter(str_detect(word, "[[:alpha:]]{3,}"))
+
+  wordnum <- sum(sapply(gregexpr(" ", hamother$emails[i]), length)+1)  
+
+  unknownsent <- tidy_df %>%
+    inner_join(get_sentiments("bing")) %>%
+    count(sentiment) 
+
+  sentimentperc <- (unknownsent$n[2]-unknownsent$n[1])/(unknownsent$n[2]+unknownsent$n[1])
+
+
+  ifelse (sentimentperc > .25, decision<-c(decision, "spam"), {ifelse (wordnum < 400, decision <- c(decision,"ham"), decision<-c(decision, "spam"))})
+}
+
+length(decision[decision=="ham"])/length(decision)
+
+```
+
+```{r}
+
+
+wordcloud2(data=spamwords, size=1.6,color = "random-light", backgroundColor = "grey",minRotation = -pi/6, maxRotation = -pi/10, minSize = 10,
+  rotateRatio = 1)
+
+
+```
+
+```{r}
+top50 <- head(dplyr::arrange(spamwords,desc(n)), n = 50)
+
+top50 %>%
+  anti_join(stop_words) %>%
+  count(word) %>%
+  with(wordcloud(word, n, max.words = 100,rot.per=0.25,scale=c(2,1.0),colors = "#F8766D"))
+
+
+
+```
+
+
+
+## Conclusion
+
+It appears that the ham emails have more negative sentiments.  It makes sense that spam emails have more of a positive sentiment when you think about what their purpose is.  Their purpose is to get you to click on any link within that email.  People are more likely to click on a link if it appears there's a positive outcome.
+
