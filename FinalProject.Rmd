@@ -1,0 +1,182 @@
+---
+title: "Final Project"
+author: "Nilsa Bermudez"
+date: "5/6/2020"
+output: 
+  html_document:
+    theme: cerulean   
+    code_folding: hide
+    toc: true
+    toc_float:
+      collapsed: false
+      smooth_scroll: false
+---
+
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo=TRUE)
+```
+
+```{r load_libraries, results='hide', message=FALSE, warning=FALSE}
+library(kableExtra)
+suppressMessages(library(plotly))
+library(dplyr)
+library(DT)
+library(stringr)
+suppressMessages(library(ggplot2))
+suppressMessages(library(dplyr))
+library(tidytext)
+library(tidyr)
+library(xlsx)
+library(reshape2)
+#library(usmap)
+#library(maps)
+
+
+```
+
+## Introduction - What is the prevalence of diabetes in the U.S.?
+
+For this project, I will:  
+1. Map out the number of amputations for diabetetics by state  
+2. Determine what state has the highest # of amputations and which gender is it predominately for.  
+3. Determine if across the U.S. if amputations are a predominately higher for a specific gender.  
+
+## 1. The Data
+
+Initially, I wanted to do an analysis on diabetic amputations and socioeconomic factors.  However, I was unable to obtain a large portion of the data due to HIPAA laws.  I then turned to the basic question of - what is the prevalence of diabetes in the U.S.? In doing so, I found some alarming information regarding occurrences of diabetic amputations by gender.
+
+## 2. Get the data and load it into a dataframe
+
+```{r ReadFile}
+
+
+diabetes <-read.csv("https://raw.githubusercontent.com/nilsabermudez/607/master/complications_hospitalizations_99.csv",   header=TRUE, sep=",")
+
+```
+
+
+## 3. Subset the Data by extracting the columns needed for this project.
+
+```{r}
+CaData <-  diabetes[c(2,3,4,6,26)]
+#CaData
+CaData2 <-subset(CaData,age==0)
+CaData3 <-subset(CaData2,sex==0)
+#CaData3
+
+```
+## 4. Cleanse the data - remove N/A's
+
+```{r}
+Completerecords <- na.omit(CaData3)
+#Completerecords
+```
+
+
+
+
+
+
+
+```{r Gold }
+p <- ggplot2::ggplot(data=Completerecords,  aes(x=state, y=lea_count, color = year,group=year)) +
+ 
+   geom_line(show.legend=TRUE) +   
+ theme(legend.position = "top") +
+ 
+  ggplot2::labs(x="States",y="Number of Amputations") +  ggtitle("Amputations across the U.S. due to Diabetes")+
+  ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 90, vjust = 0.35, hjust=.5))   
+
+
+plotly::ggplotly(p,colors = 'YlOrRd' )
+
+```
+
+## 5. Here we see that in 2014, Texas had the most amputations at an alarming number of 11,488 cases.
+
+
+
+
+
+
+
+## 6. Let's drill down and see what the gender distribution was for that year and that state:
+
+```{r}
+
+Texas <- subset(CaData, state=="TEXAS", select = c("state","year", "sex", "age","lea_count"))
+TexasMF <- subset(Texas, state=="TEXAS", select = c("state","year", "sex", "age","lea_count"))
+
+
+```
+
+```{r}
+
+Texas <- Texas[Texas$sex %in% c(1, 2),]
+Texas <- subset(Texas, age==0, select = c("state","year", "sex", "age","lea_count"))
+
+p<-ggplot(data=Texas, aes(y=lea_count, x=factor(sex))) +
+  geom_bar(stat="identity", width=0.7, fill="steelblue",show.legend=TRUE)+
+ theme(legend.position = "top") +
+    ggplot2::labs(x="Amputations by Gender",y="Number of Amputations") +  ggtitle("2014 - State of Texas Amputations by Gender")+ 
+   scale_x_discrete(labels=c("1" = "Males", "2" = "Females")) 
+
+ p + guides(color = guide_legend(reverse = TRUE))
+```
+ 
+ 
+## 7. Let's map out the U.S. Amputations by Gender for the 2014 year
+ 
+```{r}
+AllData <- subset(CaData, age==0, select = c("state","year", "sex", "age","lea_count"))
+
+USAmputations <-subset(AllData, year==2014, select = c("state","year", "sex", "age","lea_count"))
+USAmputations <-  USAmputations[USAmputations$sex %in% c(1, 2),]
+#USAmputations
+
+```
+
+```{r}
+
+
+p <- ggplot2::ggplot(data=USAmputations,  aes(x=state, y=lea_count, group=state, fill= sex, color=sex))  +geom_bar(stat = "identity", position = "dodge", width=.5)+theme(legend.position = "none") +
+   scale_x_discrete(labels=c("1" = "Males", "2" = "Females")) +
+  ggplot2::labs(x="States",y="Number of Amputations") +  ggtitle("Amputations across the U.S. due to Diabetes by Gender - 2014")+
+  ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 90, vjust = 0.35, hjust=.5)) +
+  theme(panel.grid.major.x = element_blank()) 
+
+ ggplotly(tooltip = c("text", "x", "fill", "y")) 
+ 
+ 
+```
+
+
+## 8. Looking at the Poverty estimate for the state of Texas, it is over 4 million.  
+
+```{r}
+CensusPoverty <-read.csv("https://raw.githubusercontent.com/nilsabermudez/607/master/est14us.csv",skip=5,  header=TRUE, sep=",")
+CensusPoverty <- subset(CensusPoverty,  select = c(Postal.Code, Poverty.Estimate..All.Ages))
+datatable(CensusPoverty, options = list(pageLength = 5))
+
+```
+
+
+
+
+## Conclusions
+
+In this project:
+
+1. In 2014, Texas had the highest number of amputations.
+2. Males are getting amputations at a higher rate than females not only in Texas in 2014 - but across the U.S. in general.
+3. Socioeconomic challenges may be a factor for the high number of amputees in Texas.
+
+This analysis could be presented to the diabetic community as a teaching example of the dangerous complications due to having diabetes.  
+
+
+References:  
+
+https://www.census.gov/data/datasets/2014/demo/saipe/2014-state-and-county.html  
+https://nccd.cdc.gov/CKD/default.aspx  
