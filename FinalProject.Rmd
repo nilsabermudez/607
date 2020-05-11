@@ -36,7 +36,7 @@ library(reshape2)
 
 ```
 
-## Introduction - What is the prevalence of diabetes in the U.S.?
+## Introduction - What is the prevalence of diabetec amputations in the U.S.?
 
 For this project, I will:  
 1. Map out the number of amputations for diabetetics by state  
